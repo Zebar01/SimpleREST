@@ -16,12 +16,21 @@ app.use('/api/query', function(req, res){
   let opt = {
       deal_type:      req.query.deal_type      || 'sale',
       engine_version: req.query.engine_version || 2,
-      maxprice:       req.query.maxprice       || 6000000,
-      minprice:       req.query.minprice       || 5000000,
+      maxprice:       req.query.maxprice       || 25000000,
+      minprice:       req.query.minprice       || 3000000,
       offer_type:     req.query.offer_type     || 'flat',
-      region:         req.query.region         || 1,
+      district:       req.query.district       || 33,		//Район Москвы для выборки
+													/* ид районов
+													СЗАО 1 : Куркино 125, Митино 126, Покровское-Стрешнево 127, Северное Тушино 128, Строгино 129, Хорошево-Мневники 130, Щукино 131, Южное тушино 132
+													САО 5 : Аэропорт 23, Беговой 24, Бескудниковский 25, Войковский 26, Восточное Дегунино 27, Головинский 28, Дмитровский 29, Западное Дегунино 30, Коптево 31, Левобережный 32, Молжаниновский 33, Савёловский 34, Сокол 35, Тимирязевский 36, Ховрино 37, Хорошевский 38 
+													ЦАО : Арбат 13
+													*/
       query_type:     req.query.query_type     || 'newquery',
-  };
+	  ne1etaj:		  req.query.ne1etaj			|| 0,	// не первый этаж
+	  vtor:			  req.query.vtor			|| 1,	//только вторичка
+	  only_flat:	  req.query.only_flat		||	1,
+	  
+	  };
 
   if (req.query.room1 && req.query.room1 == 1)
   {
@@ -30,12 +39,12 @@ app.use('/api/query', function(req, res){
 
   if (req.query.room2 && req.query.room2 == 1)
   {
-      opt.room2 = 1;
+      opt.room2 = 1;			//если не надо, то может выборку на 2 комнаты убрать?
   }
 
   if (req.query.p)
   {
-      opt.p = req.query.p;
+      opt.p = req.query.p;		//номер страницы выборки
   }
 
   if(opt.query_type == 'saved'){
@@ -50,12 +59,27 @@ app.use('/api/query', function(req, res){
       }
   }
 
-  let url = `https://www.cian.ru/cat.php?currency=2&deal_type=${opt.deal_type}&engine_version=${opt.engine_version}&maxprice=${opt.maxprice}&minprice=${opt.minprice}&offer_type=${opt.offer_type}&region=${opt.region}`;
   
-  url += opt.room1 == 1 ? `&room1=${opt.room1}`: ``;
-  url += opt.room2 == 1 ? `&room2=${opt.room2}`: ``;
-  url += opt.p ? `&p=${opt.p}`:``;
+//"https://www.cian.ru/cat.php?currency=2&deal_type=sale&district%5B0%5D=33&engine_version=2&is_first_floor=0&maxprice=25000000&minprice=4000000&object_type%5B0%5D=1&offer_type=flat&only_flat=1&repair%5B0%5D=1&repair%5B1%5D=2&repair%5B2%5D=3&room1=1&totime=2592000";
 
+let url = `https://www.cian.ru/cat.php?currency=2&deal_type=${opt.deal_type}`;
+	url += `&district%5B0%5D=${opt.district}&engine_version=${opt.engine_version}`;
+	url += `&is_first_floor=${opt.ne1etaj}`;	// не первый этаж
+	url += `&maxprice=${opt.maxprice}&minprice=${opt.minprice}`;
+	url += `&object_type%5B0%5D=${opt.vtor}`; // только вторичка
+	url += `&offer_type=${opt.offer_type}`;
+	url += `&only_flat=${opt.only_flat}`;
+	url += "&repair%5B2%5D=1&repair%5B2%5D=2&repair%5B2%5D=3";		// ремонт - косметический 1, евро 2 и без 3
+    url += opt.room1 == 1 ? `&room1=${opt.room1}`: ``;
+	url += "&totime=2592000";			// добавление в выборку времени на количество предложений. За месяц.	
+	
+  //url += opt.room2 == 1 ? `&room2=${opt.room2}`: ``;		// убираем выборку на 2 комнаты
+  //url += opt.p ? `&p=${opt.p}`:``;	//страниц в выборке
+  
+  //url += "&sost_type=1";		// 1 - только свободная продажа, 2 - альтернатива, закомментировать строку - оба предложения
+	
+  
+  
   console.log(url);
   
   request({
