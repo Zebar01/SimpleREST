@@ -42,7 +42,7 @@ for(var irg=1; irg<4;irg++){
                         //****************************************************** */
                         
                     } catch(err){
-                        res.status(404).send(err);
+                     //   res.status(404).send(err);
                      //   return;
                     }
                 } else {
