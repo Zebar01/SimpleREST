@@ -1,4 +1,4 @@
-let flag_ex=false;
+            let flag_ex=false;
             for(let irg=1; irg<4;irg++){
                 console.log('irg='+irg);
                 setTimeout( function(){         // запрос по таймауту
@@ -49,12 +49,10 @@ let flag_ex=false;
                                     obj = JSON.parse(tmp); 
                                     //*************************************** */
                                     // проверка наличия в json предложения №1
-                                    b=false;
                                     if(obj){
                                         for(const k in obj){                        
                                             pos=`${obj[k]['phone_data_layer']['position']}`;             
                                             if(pos==1){
-                                            b=true;//define here
                                                 if (fl_1str==true){                  
                                                     fl_ex=true; //если первая страница вновь обнаружена, то флаг выхода = тру
                                                     irg=10000;
@@ -62,7 +60,6 @@ let flag_ex=false;
                                                 fl_1str=true;
                                             }
                                             console.log(pos);       //номера позиций в json-файле
-                                        //  console.log(b);
                                         }
                                     }
                                     //запись/перезапись json. в будущем реалиовать запись 1 раз в конце цикла
@@ -76,7 +73,6 @@ let flag_ex=false;
                                     
                                 } catch(err){
                                     res.status(404).send(err);
-                                //   return;
                                 }
                             } else {
                                     console.log('Empty response. statusCode:', response.statusCode);
