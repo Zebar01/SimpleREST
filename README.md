@@ -1,9 +1,10 @@
-#Simple REST API Sever
+# Simple REST API Sever
 
 Simple REST API Server
 
 ```
 git clone https://github.com/AnatoliyAksenov/SimpleREST.git
+cd SimpleREST
 npm install
 node index
 ```
