@@ -87,7 +87,7 @@ app.use('/api/query', function(req, res){
   url += opt.room1 == 1 ? `&room1=${opt.room1}`: ``;
   url += opt.room2 == 1 ? `&room2=${opt.room2}`: ``;*/
   url += opt.p ? `&p=${opt.p}`:``;
-  console.log(url);
+ // console.log(url);
 
   let request_url = function(u, arr, page, maxpage){
       
@@ -105,9 +105,11 @@ app.use('/api/query', function(req, res){
                         'Cache-Control': 'no-cache',
                     },
                     gzip: true
-      };
+      }; 
+      
       let fl_1str=false;
       let fl_ex=false;
+      let tmp = '';
       request(opts, function (error, response, body) {
             if (error)
                 console.log(error);
@@ -117,24 +119,25 @@ app.use('/api/query', function(req, res){
                 let $ = cheerio.load(body);
                 let text = $('script:not([type])').eq(6).text();
                 
-                //let obj = JSON.parse(text.match(/window._offers = ([^;]*);/)[1]);
-                let tmp = '';
+               
                 try{
-                    tmp = text.match(/window._offers = (.*);\s+window._region/)[1];
+                    tmp = tmp+text.match(/window._offers = (.*);\s+window._region/)[1];
                     let obj = JSON.parse(tmp); 
-                    if(obj){
+                    console.log(opts.uri);
+                   ///************************************************************** */
+                    //выяыление последней страницы
+                   if(obj){
                         for(const k in obj){                        
                             pos=`${obj[k]['phone_data_layer']['position']}`;             
                             if(pos==1){
                                 if (fl_1str==true){                  
                                     fl_ex=true; //если первая страница вновь обнаружена, то флаг выхода = тру
-                                    irg=10000;
                                 } 
-                                fl_1str=true;
+                                 fl_1str=true;
                             }
                             console.log(pos);       //номера позиций в json-файле
                         }
-                    }
+                }
                     arr.push(obj);
                     console.log(page);
                     if(page < maxpage){
@@ -157,6 +160,7 @@ app.use('/api/query', function(req, res){
   };
   var my_arr = [];
   request_url(url, my_arr, 1, 3);
+  
 
 
 });
