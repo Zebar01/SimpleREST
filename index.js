@@ -57,7 +57,9 @@ app.use('/api/query', function(req, res){
   url += opt.room2 == 1 ? `&room2=${opt.room2}`: ``;
   url += opt.p ? `&p=${opt.p}`:``;
 
-  let request_url = function(u, arr, page, maxpage){
+  let stopper = '';
+
+  let request_url = function(u, arr, page){
       
       let opts = {  uri: u + `&p=${page}`,
                     headers: {
@@ -80,39 +82,55 @@ app.use('/api/query', function(req, res){
                 console.log(error);
                     
             if(response && response.statusCode && response.statusCode == 200) {
-                //fs.writeFileSync('test.log',body);
                 let $ = cheerio.load(body);
                 let text = $('script:not([type])').eq(6).text();
                 
-                //let obj = JSON.parse(text.match(/window._offers = ([^;]*);/)[1]);
                 let tmp = '';
                 try{
                     tmp = text.match(/window._offers = (.*);\s+window._region/)[1];
                     
                     let obj = JSON.parse(tmp); 
-                    
-                    arr.push(obj);
-                    console.log(page);
-                    if(page < maxpage){
+                    let first_key = '';
+
+                    //get first key in loaded object                   
+                    for(let key in obj){
+                        first_key = key;                        
+                        break;    
+                    }
+
+                    console.log(`page == ${page}\nstopper == ${stopper}\nfirst_key == ${first_key}`);
+                    if(first_key != stopper){
+                        //init stopper after fist page
+                        if(stopper == '')
+                            stopper = first_key;
+
+                        //save page data    
+                        console.log('page added');
+                        arr.push(obj);
+
+                        //start recursive page grubbing
                         setTimeout(function(){
-                            request_url(u, arr, ++page, maxpage);
+                            request_url(u, arr, ++page);
                         }, 1000);
                     } else {
-                        //save to file here
-                        console.log(arr);
+                        fs.writeFileSync(__dirname + `/data.json`, JSON.stringify(arr));
+                        res.send('OK');
                     }
                 } catch(err){
+                    console.log('ERROR: ' + err);
+                    res.send(JSON.stringify(err));
                     return;
                 }
       
             } else {
                 console.log('Empty response. statusCode:', response.statusCode);
+                res.send(response.statusCode);
                 return;
             }
         });
   };
   var my_arr = [];
-  request_url(url, my_arr, 1, 3);
+  request_url(url, my_arr, 1);
 
 
 });
