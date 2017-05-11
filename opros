@@ -6,24 +6,37 @@ let express = require('express');
 let fs      = require('fs');
 
 let app = express();
+let mkdirp = require('mkdirp');
 
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(require('express-session')({ secret: 'Super pupper secret string.!.', resave: true, saveUninitialized: true }));
 
 app.use('/api/query', function(req, res){
-    
-  let pageurl='&p=';
-  let opt = {
+         /*********************************************************************************************** */
+    //создание папки - работает
+    //Дата и время
+    let now = new Date();         
+    let god = now.getFullYear();
+    let mes = now.getMonth()+1;
+    let den = now.getDate();
+    let pathjs =`/public/json/cian/`+god+'/'+mes+'/'+den;       //год-месяц-день
+    let path1=__dirname+pathjs;
+   
+     mkdirp(path1, function (err) {
+        if (err) console.error(err)
+        else console.log(path1)   //путь к созданной папке в терминале*/
+    });
+let opt = {
       deal_type:      req.query.deal_type      || 'sale',
       engine_version: req.query.engine_version || 2,
-      maxprice:       req.query.maxprice       || 6000000,
-      minprice:       req.query.minprice       || 5000000,
+      maxprice:       req.query.maxprice       || 25000000,
+      minprice:       req.query.minprice       || 4000000,
       offer_type:     req.query.offer_type     || 'flat',
       region:         req.query.region         || 1,
       query_type:     req.query.query_type     || 'newquery',
       get_app_pages:  req.query.get_all        || false,
-      district:       req.query.district       || 34,		//Район Москвы для выборки
+      district:       req.query.district       || 24,		//Район Москвы для выборки
                                                                 /* ид районов
                                                                 СЗАО 1 : Куркино 125, Митино 126, Покровское-Стрешнево 127, Северное Тушино 128, Строгино 129, Хорошево-Мневники 130, Щукино 131, Южное тушино 132
                                                                 САО 5 : Аэропорт 23, Беговой 24, Бескудниковский 25, Войковский 26, Восточное Дегунино 27, Головинский 28, Дмитровский 29, Западное Дегунино 30, Коптево 31, Левобережный 32, Молжаниновский 33, Савёловский 34, Сокол 35, Тимирязевский 36, Ховрино 37, Хорошевский 38 
@@ -41,6 +54,22 @@ app.use('/api/query', function(req, res){
      kolkom:         req.query.room         || 1,  //количество комнат
   };
 
+  if (req.query.p)
+  {
+      opt.p = req.query.p;
+  }
+  /*
+  let opt = {
+      deal_type:      req.query.deal_type      || 'sale',
+      engine_version: req.query.engine_version || 2,
+      maxprice:       req.query.maxprice       || 6000000,
+      minprice:       req.query.minprice       || 5000000,
+      offer_type:     req.query.offer_type     || 'flat',
+      region:         req.query.region         || 1,
+      query_type:     req.query.query_type     || 'newquery',
+      get_app_pages:  req.query.get_all        || false,
+  };
+
   if (req.query.room1 && req.query.room1 == 1)
   {
       opt.room1 = 1;
@@ -49,7 +78,7 @@ app.use('/api/query', function(req, res){
   if (req.query.room2 && req.query.room2 == 1)
   {
       opt.room2 = 1;
-  }
+  }*/
 
   if (req.query.p)
   {
@@ -67,29 +96,36 @@ app.use('/api/query', function(req, res){
           return;
       }
   }
+// формирование url 
+let url='';
+let komnat=1;
+  let url2=function(komnat){}
 
-  let url = `https://www.cian.ru/cat.php?currency=2&deal_type=${opt.deal_type}`;
-                                url += `&district%5B0%5D=${opt.district}&engine_version=${opt.engine_version}`;
-                                url += `&is_first_floor=${opt.ne1etaj}`;	// не первый этаж
-                                url += `&maxprice=${opt.maxprice}&minprice=${opt.minprice}`;
-                                url += `&object_type%5B0%5D=${opt.vtor}`; // только вторичка
-                                url += `&offer_type=${opt.offer_type}`;
-                                url += `&only_flat=${opt.only_flat}`;
-                             //   url += `${pageurl}`+irg;
-                                url += "&repair%5B2%5D=1&repair%5B2%5D=2&repair%5B2%5D=3";		// ремонт, косм - 1, евро - 2, без - 3
-                                url += opt.kolkom == 1 ? '&room1=1': '';
-                                url += opt.kolkom == 2 ? '&room2=1': '';
-                                url += opt.kolkom == 3 ? '&room3=1': '';
-                                url += "&totime=2592000";			// выборка за месяц
-
- /* let url = `https://www.cian.ru/cat.php?currency=2&deal_type=${opt.deal_type}&engine_version=${opt.engine_version}&maxprice=${opt.maxprice}&minprice=${opt.minprice}&offer_type=${opt.offer_type}&region=${opt.region}`;
+        url = `https://www.cian.ru/cat.php?currency=2&deal_type=${opt.deal_type}`;
+        url += `&district%5B0%5D=${opt.district}&engine_version=${opt.engine_version}`;
+        url += `&is_first_floor=${opt.ne1etaj}`;	// не первый этаж
+        url += `&maxprice=${opt.maxprice}&minprice=${opt.minprice}`;
+        url += `&object_type%5B0%5D=${opt.vtor}`; // только вторичка
+        url += `&offer_type=${opt.offer_type}`;
+        url += `&only_flat=${opt.only_flat}`;
+        url += "&repair%5B2%5D=1&repair%5B2%5D=2&repair%5B2%5D=3";		// ремонт, косм - 1, евро - 2, без - 3
+        url += komnat == 1 ? '&room1=1': '';
+        url += komnat == 2 ? '&room2=1': '';
+        url += komnat == 3 ? '&room3=1': '';
+        url += "&totime=2592000";			// выборка за месяц
+        console.log(url);
+//        url += opt.p ? `&p=${opt.p}`:``;}
+/*
+  let url = `https://www.cian.ru/cat.php?currency=2&deal_type=${opt.deal_type}&engine_version=${opt.engine_version}&maxprice=${opt.maxprice}&minprice=${opt.minprice}&offer_type=${opt.offer_type}&region=${opt.region}`;
   
   url += opt.room1 == 1 ? `&room1=${opt.room1}`: ``;
-  url += opt.room2 == 1 ? `&room2=${opt.room2}`: ``;*/
+  url += opt.room2 == 1 ? `&room2=${opt.room2}`: ``;
   url += opt.p ? `&p=${opt.p}`:``;
- // console.log(url);
+*/
+  let stopper = '';
+  url2(1);
 
-  let request_url = function(u, arr, page, maxpage){
+  let request_url = function(u, arr, page){
       
       let opts = {  uri: u + `&p=${page}`,
                     headers: {
@@ -105,62 +141,71 @@ app.use('/api/query', function(req, res){
                         'Cache-Control': 'no-cache',
                     },
                     gzip: true
-      }; 
-      
-      let fl_1str=false;
-      let fl_ex=false;
-      let tmp = '';
+      };
+
       request(opts, function (error, response, body) {
             if (error)
                 console.log(error);
-            let pos='';        
+                    
             if(response && response.statusCode && response.statusCode == 200) {
-                //fs.writeFileSync('test.log',body);
                 let $ = cheerio.load(body);
                 let text = $('script:not([type])').eq(6).text();
                 
-               
+                let tmp = '';
                 try{
-                    tmp = tmp+text.match(/window._offers = (.*);\s+window._region/)[1];
+                    tmp = text.match(/window._offers = (.*);\s+window._region/)[1];
+                    
                     let obj = JSON.parse(tmp); 
-                    console.log(opts.uri);
-                   ///************************************************************** */
-                    //выяыление последней страницы
-                   if(obj){
-                        for(const k in obj){                        
-                            pos=`${obj[k]['phone_data_layer']['position']}`;             
-                            if(pos==1){
-                                if (fl_1str==true){                  
-                                    fl_ex=true; //если первая страница вновь обнаружена, то флаг выхода = тру
-                                } 
-                                 fl_1str=true;
-                            }
-                            console.log(pos);       //номера позиций в json-файле
-                        }
-                }
-                    arr.push(obj);
-                    console.log(page);
-                    if(page < maxpage){
+                    let first_key = '';
+
+                    //get first key in loaded object                   
+                    for(let key in obj){
+                        first_key = key;                        
+                        break;    
+                    }
+
+                    console.log(`page == ${page}\nstopper == ${stopper}\nfirst_key == ${first_key}`);
+                    if(first_key != stopper){
+                        //init stopper after fist page
+                        if(stopper == '')
+                            stopper = first_key;
+
+                        //save page data    
+                        console.log('page added');
+                        arr.push(obj);
+
+                        //start recursive page grubbing
                         setTimeout(function(){
-                            request_url(u, arr, ++page, maxpage);
+                            request_url(u, arr, ++page);
                         }, 1000);
                     } else {
-                        //save to file here
-                      //  console.log(arr);
+                        //fs.writeFileSync(__dirname + `/data.json`, JSON.stringify(arr));
+                        //res.send('OK');
+                        fs.writeFileSync(/*__dirname*/path1 + '/'+`${opt.district}`+'-'+`${opt.kolkom}`+'.json', JSON.stringify(arr));
+                      //  res.send('ID_district='+opt.district+' - OK');
+                      console.log(path1 + '/'+`${opt.district}`+'-'+`${opt.kolkom}`+'.json'); // в консоль пишется, какой json был записан
                     }
                 } catch(err){
+                    console.log('ERROR: ' + err);
+                    res.send(JSON.stringify(err));
                     return;
                 }
       
             } else {
                 console.log('Empty response. statusCode:', response.statusCode);
+                res.send(response.statusCode);
                 return;
             }
         });
   };
-  var my_arr = [];
-  request_url(url, my_arr, 1, 3);
   
+  setTimeout(function(){
+    stopper='';
+    var my_arr = [];
+    komnat=komnat+1;
+    url2(komnat);
+    request_url(url2, my_arr, 1);
+},10000);
 
 
 });
