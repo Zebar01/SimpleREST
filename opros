@@ -27,12 +27,12 @@ app.use('/api/query', function(req, res){
         if (err) console.error(err)
         else console.log(path1)   //путь к созданной папке в терминале*/
     });
-    //129
+    //129 элементов
 let ID_Ray = new Array();
-ID_Ray = [/*1,*/ 125/*, 126, 127*/]             
+ID_Ray = [1, 125, 126, 127, 128,  129,  130,  131,   132, 5,  23,  24,  25,  26,   27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38 , 6, 39,  40,  41,  42,  43,  44,  45,  46,   47,  48,  49,  50,  51,   52,  53,   54,  55, 11, 112,  113,  114,  115,  116,  117,  118,   119,  120,  121,  122,   123,  124,  349,  348,  350,   13,  14,  15,  16,  17,  18,  19,  20,  21,  22, 7,  56,  57,   58,  59,  60,  61,  62,  63,  64,  65,  66,  67,  68,   69,   70,  71, 10,  100,  101,  102,  103,  104,  105,  106,   107,   108,  109,   110,  111 ,9,   84,   85,  86,  87,  88,  89,  90,  91,   92,  93,   94,   95,  96,   97,   98,   99, 8,  72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83]
 let idr=0;
 //console.log(ID_Ray[idr]);       // обращение к элементу массива, начинается с 0
-//, 128,  129,  130,  131,   132, 5,  23,  24,  25,  26,   27,  28,  29,   30,  31,  32,  33,  34,  35,  36,  37,  38 , 6, 39,  40,  41,  42,  43,  44,  45,  46,   47,  48,  49,  50,  51,   52,  53,   54,  55, 1  112,  113,  114,  115,  116,  117,  118,   119,  120,  121,  122,   123,  124,  349,  348,  350,   13,  14,  15,  16,  17,  18,  19,  20,  21,  22, 7  56,  57,   58,  59,  60,  61,  62,  63,  64,  65,  66,  67,  68,   69,   70,  71, 10  100,  101,  102,  103,  104,  105,  106,   107,   108,  109,   110,  111 ,9   84,   85,  86,  87,  88,  89,  90,  91,   92,  93,   94,   95,  96,   97,   98,   99, 8,  72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83]
+//
 let opt = {
       deal_type:      req.query.deal_type      || 'sale',
       engine_version: req.query.engine_version || 2,
@@ -85,6 +85,7 @@ let opt = {
 // формирование url 
 let url='';
 let komnat=1;
+let tekkomjs=0;
   let url2=function(rayon,komnat){
         url = `https://www.cian.ru/cat.php?currency=2&deal_type=${opt.deal_type}`;
      //   url += `&district%5B0%5D=${opt.district}&engine_version=${opt.engine_version}`;
@@ -104,6 +105,7 @@ let komnat=1;
 
 
   let stopper = '';
+  let kidr=0;
   //url2(1);
   let request_url = function(u, arr, page){
       
@@ -122,7 +124,7 @@ let komnat=1;
                     },
                     gzip: true
       };
-
+        console.log('idr='+idr+' komnat='+komnat);
       request(opts, function (error, response, body) {
             if (error)
                 console.log(error);
@@ -161,16 +163,20 @@ let komnat=1;
                     } else {
                         //запись json
                         fs.writeFileSync(/*__dirname*/path1 + '/'+ID_Ray[idr]+'-'+komnat+'.json', JSON.stringify(arr));
-                        flexkom2=true;
+                        //flexkom2=true;
                         console.log(path1 + '/'+ID_Ray[idr]+'-'+komnat+'.json'); // в консоль пишется, какой json был записан
+                       tekkomjs=komnat;
                         if (komnat==3){
-                            if (idr==ID_Ray.length){    //записан последний район, выходим из цикла интервал
+                            flexidr=true;
+                            flexkom=false;
+                            kidr=idr+1;
+                            if (kidr==ID_Ray.length){    //записан последний район, выходим из цикла интервал
                                                          // и дальше опрашивать не надо
-                                flexidr=false;
-                                flexkom=false;
+                                flexidr=false;                            
+                                flex=true;
                                 console.log('ВСЁ');
                             }
-                            flexidr=true;
+                            
                         }
                         else {
                             flexkom=true;
@@ -189,29 +195,110 @@ let komnat=1;
         });
   };
 
-idr=-1;
+//idr=-1;
 
-let ks=0;
+
+//opros po komnat
+let flexidr=false;
+let flexkom=true;
+//let flexkom2=true;
+let flex=false;
+komnat=0;
+
+    
+let Opros1k = function(){               //опрос однушек
+            flexkom==false;
+            komnat=1;
+            stopper='';
+            var my_arr = [];
+            url2(ID_Ray[idr],komnat);        //формируем урл с учётом района и количества комнат
+            //console.log(url);
+            //console.log('OprosKom komnat='+komnat);                            
+            request_url(url, my_arr, 1);
+        };
+let Opros2k = function(){               //опрос двушек и трёшек
+            flexkom==false;
+            komnat=2;
+            stopper='';
+            var my_arr = [];
+            url2(ID_Ray[idr],komnat);        //формируем урл с учётом района и количества комнат
+            //console.log(url);
+            //console.log('OprosKom komnat1='+komnat);                            
+            request_url(url, my_arr, 1);
+        };
+let Opros3k = function(){               //опрос двушек и трёшек
+            flexkom==false;
+            komnat=3;
+            stopper='';
+            var my_arr = [];
+            url2(ID_Ray[idr],komnat);        //формируем урл с учётом района и количества комнат
+            //console.log(url);
+            //console.log('OprosKom komnat1='+komnat);                            
+            request_url(url, my_arr, 1);
+        };
+
+let ID_R= function(){       //увеличение индекса в массиве районов на 1
+    idr++;
+    flexidr=false;
+    flexkom=true;
+    komnat=0;
+    tekkomjs=0
+}
+
+let OprK = function (){
+        setTimeout (function OprosKom(){
+            //console.log(' flexidr='+flexidr+' flexkom='+flexkom+idr+' idr='+idr+' ID_Ray.length='+ID_Ray.length);
+            //console.log('ОПРОС');
+        
+        if (flex==true) {    //если тру, то трёшки уже опросили и пора выходить из опроса
+            console.log('ТОЧНО ВСЁ');
+            res.end;
+            clearTimeout(OprK);
+            return;
+        }
+        if (flexidr==true){         //увеличение индекса в массиве районов на 1, переход к след району
+            ID_R();
+        }
+        if (flexkom==true && komnat==2 && tekkomjs==2){     //опрос трёшек
+            Opros3k();
+
+        }
+        if (flexkom==true && komnat==1 && tekkomjs==1){     //опрос двушек
+            Opros2k();
+
+        }
+        if (flexkom==true && komnat==0 && tekkomjs==0){       //опрос однушек
+            Opros1k();
+        }
+        
+    setTimeout(OprosKom,10000);
+    },10000);
+};
+OprK();
+
+
+/*
 let flexidr=true;
 let flexkom=true;
 let flexkom2=true;
 let flex=false;
 setTimeout (function opros(){
-    //console.log(' flexidr='+flexidr+' flexkom='+flexkom+' flexkom2='+flexkom2+' komnat='+komnat+' ks='+ks);
-    //console.log(path1 + '/'+ID_Ray[idr]+'-'+ks+'.json')
+    console.log(' flexidr='+flexidr+' flexkom='+flexkom+' flexkom2='+flexkom2+' idr='+idr+' ID_Ray.length='+ID_Ray.length);
 
-    if (flexidr==false && flexkom==false && idr==ID_Ray.length){
+    kidr=idr+1;
+    if (flexidr==false && flexkom==false && kidr==ID_Ray.length){
         console.log('стоп');
         flex=true;
-        return;    
+        return;
     }
-    if (flexidr==true){     //если разрешён цикл обхода районов, то увеличиваем индекс элемента в массиве ид-районов на 1
+
+    /*if (flexidr==true){     //если разрешён цикл обхода районов, то увеличиваем индекс элемента в массиве ид-районов на 1
         idr++;
         komnat=0;
         flexidr=false;
         flexkom=true;    
-    }
-    if (flexkom==true){     //опрос комнат, если flexkom=true
+    }*/
+    /*if (flexkom==true){     //опрос комнат, если flexkom=true
         if (komnat==0 && flexkom2==true){     // если комната=0, то увеличиваем на 1
             flexkom2=false;
             komnat++;
@@ -231,16 +318,14 @@ setTimeout (function opros(){
                 url2(ID_Ray[idr],komnat);        //формируем урл с учётом района и количества комнат
                 console.log(url);
                 console.log('komnat='+komnat);                            
-                ks=komnat;
                 request_url(url, my_arr, 1);
            
         }
     }
     
-setTimeout(opros,10000);
-},10000);
+setTimeout(opros,30000);
+},1000);*/
 
-res.end;
 
 
   
