@@ -22,14 +22,18 @@ app.use(require('express-session')({ secret: 'Super pupper secret string.!.', re
     let den = now.getDate();
     let pathjs =`/public/json/cian/`+god+'/'+mes+'/'+den;       //год-месяц-день
     let path1=__dirname+pathjs;
-   
+    let path2=path1+'/big';
+
      mkdirp(path1, function (err) {
         if (err) console.error(err)
         else console.log(path1)   //путь к созданной папке в терминале*/
     });
-    //129 элементов
+     mkdirp(path2, function (err) {
+        if (err) console.error(err)
+        else console.log(path2)   //путь к созданной папке в терминале*/
+    });
 let ID_Ray = new Array();
-ID_Ray = [1, 125, 126, 127, 128,  129,  130,  131,   132, 5,  23,  24,  25,  26,   27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38 , 6, 39,  40,  41,  42,  43,  44,  45,  46,   47,  48,  49,  50,  51,   52,  53,   54,  55, 11, 112,  113,  114,  115,  116,  117,  118,   119,  120,  121,  122,   123,  124,   13,  14,  15,  16,  17,  18,  19,  20,  21,  22, 7,  56,  57,   58,  59,  60,  61,  62,  63,  64,  65,  66,  67,  68,   69,   70,  71, 10,  100,  101,  102,  103,  104,  105,  106,   107,   108,  109,   110,  111 ,9,   84,   85,  86,  87,  88,  89,  90,  91,   92,  93,   94,   95,  96,   97,   98,   99, 8,  72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83]
+ID_Ray = [/*125, 126, 127, 128,  129,  130,  131,   132, 23,  24,  25,  26,   27,  28,  29,  30,  31,  32,  33, 34,  35,  36,  37,  38 , 39,  40,  41,  42,  43,  44,  45,  46,   47,  48,  49,  50,*/  51,   52,  53,   54,  55, 112,  113,  114,  115,  116,  117,  118,   119,  120,  121,  122,   123,  124,   13,  14,  15,  16,  17,  18,  19,  20,  21,  22, 56,  57,   58,  59,  60,  61,  62,  63,  64,  65,  66,  67,  68,   69,   70,  71, 100,  101,  102,  103,  104,  105,  106,   107,   108,  109,   110,  111,   84,   85,  86,  87,  88,  89,  90,  91,   92,  93,   94,   95,  96,   97,   98,   99, 72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83]
 let idr=0;
       let deal_type = 'sale';
       let engine_version = 2;
@@ -76,9 +80,21 @@ let tekkomjs=0;
         console.log(url);
     }
 
-
+  let kolpred=0;  
+  let total_area=0; 
   let stopper = '';
   let kidr=0;
+  let arr_pos = new Array();        // массив хранения позиций
+  let arr_key = new Array();        // массив ключей
+  let arr_adr = new Array();        // массив хранения адресов
+  let arr_totar = new Array();        // массив площадей квартир
+  let arr_pri = new Array();        // массив цен квартир
+ // let assoc_arr=
+  let i4=0;                         // переменная-индекс для заполнения массивов
+  let objjs=[];
+  let iii=0;
+  
+    let obj3= new Array();
   let request_url = function(u, arr, page){
       
       let opts = {  uri: u + `&p=${page}`,
@@ -97,6 +113,7 @@ let tekkomjs=0;
                     gzip: true
       };
         //console.log('idr='+idr+' komnat='+komnat);            // индекс элемента массива района и количетво комнат
+       
       request(opts, function (error, response, body) {
             if (error)
                 console.log(error);
@@ -106,37 +123,170 @@ let tekkomjs=0;
                 let text = $('script:not([type])').eq(6).text();
                 
                 let tmp = '';
+                
                 try{
                     tmp = text.match(/window._offers = (.*);\s+window._region/)[1];
                     
                     let obj = JSON.parse(tmp); 
                     let first_key = '';
-
+                    //console.log(obj);
                     //get first key in loaded object                   
                     for(let key in obj){
-                        first_key = key;                        
+                        first_key = key;
                         break;    
                     }
+                  
 
                     console.log(`page == ${page}\nstopper == ${stopper}\nfirst_key == ${first_key}`);
                     if(first_key != stopper){
+                        //let tmp_lenghjt=
+                            let fl_dub=false;   //флаг дубляжа
+                           for(let key in obj){     //Подсчитываем количество предложений !дублируются рекламные
+                                fl_dub=false;
+                               // kolpred++;              // подсчитываем количкество объектов (количество предложений)                               
+                                arr_adr[i4]=obj[key]["address_string"];
+                                arr_totar[i4]=obj[key]["total_area"];
+                                arr_pri[i4]=obj[key]["phone_data_layer"]["price"];
+                                arr_key[i4]=obj[key]["phone_data_layer"]["id"];
+                                //console.log('position= '+obj[key]["phone_data_layer"]["position"]+' адресс: '+obj[key]["address_string"]+' общая площадь ='+obj[key]["total_area"]+' ! цена='+obj[key]["phone_data_layer"]["price"]);                        
+                                i4=obj[key]["phone_data_layer"]["position"];
+                             
+                                
+                                // проверка на дубляж
+                                if (obj3.length>0) {
+                                   for (let dubl1=1; dubl1<=obj3.length; dubl1++){
+                                        let d1=arr_adr[i4];
+                                        let d2=obj3[dubl1-1].adress;
+                                        //проверяем совпадение адресов
+                                        if (d1==d2){
+                                            d1=arr_totar[i4];
+                                            d2=obj3[dubl1-1].total_area;
+                                            //проверяем совпадение площадей
+                                            if (d1==d2){
+                                                d1=arr_pri[i4];
+                                                d2=obj3[dubl1-1].price;
+                                                //проверяем совпадение цен
+                                                if (d1==d2) {
+                                                    d1=arr_key[i4];
+                                                    d2=obj3[dubl1-1].id;
+                                                    //проверяем совпадение id
+                                                    if (d1==d2){
+                                                        fl_dub=true;
+                                                        console.log('Дубль='+arr_key[i4]);
+
+                                                    }
+                                                }
+                                            }
+                                        }
+                                   }
+                                    
+                                }
+
+                                if (fl_dub==false){         //если не дубляж
+                                    kolpred++;              // подсчитываем количкество объектов (количество предложений)
+                                    arr_pos[obj[key]["phone_data_layer"]["position"]]=obj[key]["phone_data_layer"]["position"];
+                                    arr_adr[i4]=obj[key]["address_string"];
+                                    arr_totar[i4]=obj[key]["total_area"];
+                                    arr_pri[i4]=obj[key]["phone_data_layer"]["price"];
+                                    arr_key[i4]=obj[key]["phone_data_layer"]["id"];
+                             
+                                    let obj2 = {           //ассоциативный массив для записи в json
+                                        position:arr_pos[i4],
+                                        price:arr_pri[i4],
+                                        total_area: arr_totar[i4],
+                                        ID: arr_key[i4],
+                                        adress: arr_adr[i4]
+                                    };
+                                    obj3.push(obj2);
+                                }
+                            }
+
+                    //console.log('kolpred='+kolpred);
                         //init stopper after fist page
                         if(stopper == '')
                             stopper = first_key;
-
                         //save page data    
                         console.log('page added');
-                        arr.push(obj);
-
+                        arr.push(obj);                   
                         //start recursive page grubbing
                         setTimeout(function(){
                             request_url(u, arr, ++page);
-                        }, 200);
+                        }, 1000);
                     } else {
                         //запись json
-                        fs.writeFileSync(/*__dirname*/path1 + '/'+ID_Ray[idr]+'-'+komnat+'.json', JSON.stringify(arr));
-                        console.log(path1 + '/'+ID_Ray[idr]+'-'+komnat+'.json'); // в консоль пишется, какой json был записан
+                        fs.writeFileSync(/*__dirname*/path2 + '/'+ID_Ray[idr]+'-'+komnat+'.json', JSON.stringify(arr));
+                        console.log(path2 + '/'+ID_Ray[idr]+'-'+komnat+'.json'); // в консоль пишется, какой json был записан
+              //          kolpred++;              // подсчитываем окончательное количкество объектов (количество предложений)
+                        //console.log('kolpred='+kolpred);
+                        
+                       // arr_key.unshift('ghgh');
+                        //iii=arr_key.length;
+                        //console.log('arr_key.length='+iii);
+                        let maxpr=0;
+                        let minpr=999999999999;
+                        let avgpr=0;
+                        let alltotar=0;
+                        let priarearur=0;
+                        let allprice=0;
+                        let dataopgod=god;
+                        let dataopmes=mes;
+                        let dataopden=den;
+                        let tmp=0;
+                        for(let i2=0; i2<kolpred; i2++){
+                            tmp=obj3[i2].price;
+                            //console.log(i2);
+                            alltotar=alltotar+obj3[i2].total_area;
+                            //console.log(maxpr);
+                            if (maxpr<tmp){
+                                maxpr=tmp;
+                            }
+                            if (minpr>tmp){
+                                minpr=tmp;
+                            }
+                            if (i2==kolpred-1){
+                                priarearur=~~((avgpr+tmp)/alltotar);        // цена за кв. м.
+                                allprice=avgpr+tmp;                  //общая цена всех квартир
+                                //console.log('='+avgpr);
+                                avgpr=(avgpr+tmp)/kolpred;          //средняя цена квартиры
+                                //console.log('='+avgpr);
+                                avgpr=~~avgpr;                      //целая часть
+                                         
+                            } else {   
+                                avgpr=(avgpr+tmp);
+                            }
+
+                        }
+                        console.log('максимальная цена квартиры ='+maxpr);
+                        console.log('минимальная цена квартиры ='+minpr);
+                        console.log('средняя цена квартиры ='+avgpr);
+                        console.log('цена всех квартир ='+allprice);
+                        console.log('цена за кв. метр ='+priarearur);
+                        console.log('общая площадь ='+alltotar);
+                        console.log('Дата = '+dataopgod);
+                        console.log('Дата = '+dataopmes);
+                        console.log('Дата = '+dataopden);
+                        console.log('Количество предложений = '+kolpred);
+
+                        let obj4 = {           //ассоциативный массив для записи в json
+                                        maxpr:maxpr,
+                                        minpr:minpr,
+                                        avgpr:avgpr,
+                                        allprice:allprice,
+                                        priarearur:priarearur,
+                                        alltotar:alltotar,
+                                        dataopgod:dataopgod,
+                                        dataopmes:dataopmes,
+                                        dataopden:dataopden,
+                                        kolpred:kolpred
+                                    };
+                                    obj3.unshift(obj4);
+                        
+                       fs.writeFileSync(/*__dirname*/path1 + '/'+ID_Ray[idr]+'-'+komnat+'-obj2.json', JSON.stringify(obj3));
+                       obj3.length=0;
+                       
+
                        tekkomjs=komnat;
+                       kolpred=0;
                         if (komnat==3){
                             flexidr=true;
                             flexkom=false;
@@ -155,12 +305,12 @@ let tekkomjs=0;
                     }
                 } catch(err){
                     console.log('ERROR: ' + err);
-                    res.send(JSON.stringify(err));
+                    //res.send(JSON.stringify(err));
                     return;
                 }      
             } else {
                 console.log('Empty response. statusCode:', response.statusCode);
-                res.send(response.statusCode);
+                //res.send(response.statusCode);
                 return;
             }
         });
@@ -238,7 +388,7 @@ let OprK = function (){
             Opros1k();
         }
         
-    setTimeout(OprosKom,5000);
-    },5000);
+    setTimeout(OprosKom,10000);
+    },10000);
 };
 OprK();
