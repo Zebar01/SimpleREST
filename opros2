@@ -23,6 +23,10 @@ app.use(require('express-session')({ secret: 'Super pupper secret string.!.', re
     let pathjs =`/public/json/cian/`+god+'/'+mes+'/'+den;       //год-месяц-день
     let path1=__dirname+pathjs;
     let path2=path1+'/big';
+    let t1= '';          //переменная времени начала опроса
+    let t2='';
+    //let h3='';
+    let fl_opr=true;                //становится фалсе при попытке лролса нового района
 
      mkdirp(path1, function (err) {
         if (err) console.error(err)
@@ -33,7 +37,20 @@ app.use(require('express-session')({ secret: 'Super pupper secret string.!.', re
         else console.log(path2)   //путь к созданной папке в терминале*/
     });
 let ID_Ray = new Array();
-ID_Ray = [/*125, 126, 127, 128,  129,  130,  131,   132, 23,  24,  25,  26,   27,  28,  29,  30,  31,  32,  33, 34,  35,  36,  37,  38 , 39,  40,  41,  42,  43,  44,  45,  46,   47,  48,  49,  50,*/  51,   52,  53,   54,  55, 112,  113,  114,  115,  116,  117,  118,   119,  120,  121,  122,   123,  124,   13,  14,  15,  16,  17,  18,  19,  20,  21,  22, 56,  57,   58,  59,  60,  61,  62,  63,  64,  65,  66,  67,  68,   69,   70,  71, 100,  101,  102,  103,  104,  105,  106,   107,   108,  109,   110,  111,   84,   85,  86,  87,  88,  89,  90,  91,   92,  93,   94,   95,  96,   97,   98,   99, 72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83]
+//ID_Ray = [1,5,6.11,4,7,10,9,8]
+ID_Ray = [/*125, 126, 127, 128,  129,  130,  131,   132, 23,  24,  25,  26,   27,  28,  29,  30,  31,  32,  33, 34,  35,  36,  37,  38 , 39,  40,  41,  42, 43,  44,  45,  46,   47,  48,  49,  50,  51,   52,  53,   54,  55, 112,  113,  114,*/  115,  116,  117,  118,   119,  120,  121,  122,  123,  124,   13,  14,  15,  16, 17,  18,  19,  20,  21,  22, 56,  57,   58,  59,  60,  61,  62,  63,  64,  65,  66,  67,  68,   69,   70,  71, 100,  101,  102,  103,  104,  105,  106,   107,   108,  109,   110,  111,  84,   85,  86,  87,  88,  89,  90,  91,   92,  93,   94,   95,  96,   97,   98,   99, 72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83]
+
+/************************************************************************ */
+//массивы для районов сзао
+let arr125={};
+let arr126={};
+let arr127={};
+let arr128={};
+let arr129={};
+let arr130={};
+let arr131={};
+let arr132={};
+//
 let idr=0;
       let deal_type = 'sale';
       let engine_version = 2;
@@ -58,7 +75,7 @@ let idr=0;
      let ne1etaj=0;     	// не первый этаж
      let vtor=1;            //только вторичка
      let only_flat=1;
-     let kolkom=1;           //количество комнат
+     let kolkom='';  //1;           //количество комнат
 
 // формирование url 
 let url='';
@@ -73,9 +90,10 @@ let tekkomjs=0;
         url += `&offer_type=`+offer_type;
         url += `&only_flat=`+only_flat;
         url += "&repair%5B2%5D=1&repair%5B2%5D=2&repair%5B2%5D=3";		// ремонт, косм - 1, евро - 2, без - 3
-        url += komnat == 1 ? '&room1=1': '';
+/*        url += komnat == 1 ? '&room1=1': '';
         url += komnat == 2 ? '&room2=1': '';
-        url += komnat == 3 ? '&room3=1': '';
+        url += komnat == 3 ? '&room3=1': '';*/
+        url += '&room1=1'+'&room2=1'+'&room3=1';                //опрос сразу однушек, двушек и трёшек
         url += "&totime=2592000";			// выборка за месяц
         console.log(url);
     }
@@ -89,12 +107,14 @@ let tekkomjs=0;
   let arr_adr = new Array();        // массив хранения адресов
   let arr_totar = new Array();        // массив площадей квартир
   let arr_pri = new Array();        // массив цен квартир
- // let assoc_arr=
+  let arr_rooms = new Array();                                    //"rooms_count - количество комнат
   let i4=0;                         // переменная-индекс для заполнения массивов
-  let objjs=[];
-  let iii=0;
+
+  /******************************************************** */
+  //массивы для записи результатов
+  //125, 126, 127, 128,  129,  130,  131,   132, 23,  24,  25,  26,   27,  28,  29,  30,  31,  32,  33, 34,  35,  36,  37,  38 , 39,  40,  41,  42, 43,  44,  45,  46,   47,  48,  49,  50,  51,   52,  53,   54,  55, 112,  113,  114,  115,  116,  117,  118,   119,  120,  121,  122,  123,  124,   13,  14,  15,  16, 17,  18,  19,  20,  21,  22, 56,  57,   58,  59,  60,  61,  62,  63,  64,  65,  66,  67,  68,   69,   70,  71, 100,  101,  102,  103,  104,  105,  106,   107,   108,  109,   110,  111,  84,   85,  86,  87,  88,  89,  90,  91,   92,  93,   94,   95,  96,   97,   98,   99, 72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83]
   
-    let obj3= new Array();
+  let obj3= new Array();
   let request_url = function(u, arr, page){
       
       let opts = {  uri: u + `&p=${page}`,
@@ -106,13 +126,14 @@ let tekkomjs=0;
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
                         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                         'Referer': 'https://www.cian.ru/',
-                        'Cookie': '_CIAN_GK=07fc4b80-0c0e-11e7-8817-4671176866ff; anonymous_id=07fc086e-0c0e-11e7-8817-4671176866ff; app_banner_disabled=true; _ym_uid=1489864008474635110; _ym_isad=2; _gat_UA-30374201-2=1; _ad_parallax_checked=1489864044891; _ad_stretch_checked=1489864044931; _ad_branding_checked=1489864044933; _ad_mobile_native_listing_checked=1489864044936; _ad_mobile_card_tgb_checked=1489864044939; _ad_mobile_parallax_serp_checked=1489864044941; _ad_serp_item_native_checked=1489864044943; _ad_card_toplong_exp_checked=1489864044944; _ad_serp_long_exp_checked=1489864044946; crtg_rta=; _ga=GA1.2.2070707254.1489864008; rrrbt=; rrpvid=235016421735327; amplitude_idcian.ru=eyJkZXZpY2VJZCI6IjQ1MDVkZDEwLTFmYWMtNDEwNC05Mzc2LWM4ZDJlMmQ1NTBkMVIiLCJ1c2VySWQiOm51bGwsIm9wdE91dCI6ZmFsc2UsInNlc3Npb25JZCI6MTQ4OTg2NDAwODI5MSwibGFzdEV2ZW50VGltZSI6MTQ4OTg2NDA0NTM5OCwiZXZlbnRJZCI6MCwiaWRlbnRpZnlJZCI6MCwic2VxdWVuY2VOdW1iZXIiOjB9; _ym_visorc_34229100=b; rcuid=58cd856f6636b3121cb0030f; rrpusid=58cd856f6636b3121cb0030f; rrlpuid=; _ym_visorc_67132=w; flocktory-uuid=7240a786-d5ce-4be4-ab27-b774e44169de-3', 
+                        'Cookie': '_CIAN_GK=07fc4b80-0c0e-11e7-8817-4671176866ff; anonymous_id=07fc086e-0c0e-11e7-8817-4671176866ff; app_banner_disabled=true; _ym_uid=1489864008474635110; _ym_isad=2; _gat_UA-30374201-2=1; _ad_parallax_checked=1489864044891; _ad_stretch_checked=1489864044931; _ad_branding_checked=1489864044933; _ad_mobile_native_listing_checked=1489864044936; _ad_mobile_card_tgb_checked=1489864044939; _ad_mobile_parallax_serp_checked=1489864044941; _ad_serp_item_native_checked=1489864044943; _ad_card_toplong_exp_checked=1489864044944; _ad_serp_long_exp_checked=1489864044946; crtg_rta=; _ga=GA1.2.2070707254.1489864008; rrrbt=; rrpvid=235016421735327; amplitude_idcian.ru=eyJkZXZpY2VJZCI6IjQ1MDVkZDEwLTFmYWMtNDEwNC05Mzc2LWM4ZDJlMmQ1NTBkMVIiLCJ1c2VySWQiOm51bGwsIm9wdE91dCI6ZmFsc2UsInNlc3Npb25JZCI6MTQ4OTg2NDAwODI5MSwibGFzdEV2ZW50VGltZSI6MTQ4OTg2NDA0NTM5OCwiZXZlbnRJZCI6MCwiaWRlbnRpZnlJZCI6MCwic2VxdWVuY2VOdW1iZXIiOjB9; _ym_visorc_34229100=b; rcuid=58cd856f6636b3121cb0030f; rrpusid=58cd856f6636b3121cb0030f; rrlpuid=; _ym_visorc_67132=w; flocktory-uuid=7240a786-d5ce-4be4-ab27-b774e44169de-3',                         
                         'Connection': 'keep-alive',
                         'Cache-Control': 'no-cache',
                     },
                     gzip: true
       };
-        //console.log('idr='+idr+' komnat='+komnat);            // индекс элемента массива района и количетво комнат
+
+
        
       request(opts, function (error, response, body) {
             if (error)
@@ -120,16 +141,18 @@ let tekkomjs=0;
                     
             if(response && response.statusCode && response.statusCode == 200) {
                 let $ = cheerio.load(body);
-                let text = $('script:not([type])').eq(6).text();
                 
+                let text = $('script:not([type])').eq(6).text();
+ //               let p1=cheerio.load(`span.serp-list__offers-count.count`); //`#content > div > div:nth-child(2) > div.js-serp-list > div.serp-list__header > div:nth-child(3) > div.serp-list__summary > div > span`);
+//                console.log(p1);
                 let tmp = '';
                 
+
                 try{
                     tmp = text.match(/window._offers = (.*);\s+window._region/)[1];
                     
                     let obj = JSON.parse(tmp); 
                     let first_key = '';
-                    //console.log(obj);
                     //get first key in loaded object                   
                     for(let key in obj){
                         first_key = key;
@@ -139,17 +162,15 @@ let tekkomjs=0;
 
                     console.log(`page == ${page}\nstopper == ${stopper}\nfirst_key == ${first_key}`);
                     if(first_key != stopper){
-                        //let tmp_lenghjt=
-                            let fl_dub=false;   //флаг дубляжа
+                           let fl_dub=false;   //флаг дубляжа
                            for(let key in obj){     //Подсчитываем количество предложений !дублируются рекламные
-                                fl_dub=false;
-                               // kolpred++;              // подсчитываем количкество объектов (количество предложений)                               
+                                fl_dub=false;                             
                                 arr_adr[i4]=obj[key]["address_string"];
                                 arr_totar[i4]=obj[key]["total_area"];
                                 arr_pri[i4]=obj[key]["phone_data_layer"]["price"];
                                 arr_key[i4]=obj[key]["phone_data_layer"]["id"];
-                                //console.log('position= '+obj[key]["phone_data_layer"]["position"]+' адресс: '+obj[key]["address_string"]+' общая площадь ='+obj[key]["total_area"]+' ! цена='+obj[key]["phone_data_layer"]["price"]);                        
                                 i4=obj[key]["phone_data_layer"]["position"];
+                                arr_rooms[i4]=obj[key]["rooms_count"];     //количество комнат
                              
                                 
                                 // проверка на дубляж
@@ -182,6 +203,8 @@ let tekkomjs=0;
                                     
                                 }
 
+                                /************************************************************** */
+                                //дубляжа нет, формируем эдемент для записи в массив района
                                 if (fl_dub==false){         //если не дубляж
                                     kolpred++;              // подсчитываем количкество объектов (количество предложений)
                                     arr_pos[obj[key]["phone_data_layer"]["position"]]=obj[key]["phone_data_layer"]["position"];
@@ -189,19 +212,19 @@ let tekkomjs=0;
                                     arr_totar[i4]=obj[key]["total_area"];
                                     arr_pri[i4]=obj[key]["phone_data_layer"]["price"];
                                     arr_key[i4]=obj[key]["phone_data_layer"]["id"];
+                                    arr_rooms[i4]=obj[key]["rooms_count"];     //количество комнат
                              
                                     let obj2 = {           //ассоциативный массив для записи в json
                                         position:arr_pos[i4],
                                         price:arr_pri[i4],
                                         total_area: arr_totar[i4],
                                         ID: arr_key[i4],
-                                        adress: arr_adr[i4]
+                                        adress: arr_adr[i4],
+                                        rooms: arr_rooms[i4]
                                     };
-                                    obj3.push(obj2);
+                                    obj3.push(obj2);        //массив района
                                 }
                             }
-
-                    //console.log('kolpred='+kolpred);
                         //init stopper after fist page
                         if(stopper == '')
                             stopper = first_key;
@@ -214,14 +237,8 @@ let tekkomjs=0;
                         }, 1000);
                     } else {
                         //запись json
-                        fs.writeFileSync(/*__dirname*/path2 + '/'+ID_Ray[idr]+'-'+komnat+'.json', JSON.stringify(arr));
-                        console.log(path2 + '/'+ID_Ray[idr]+'-'+komnat+'.json'); // в консоль пишется, какой json был записан
-              //          kolpred++;              // подсчитываем окончательное количкество объектов (количество предложений)
-                        //console.log('kolpred='+kolpred);
-                        
-                       // arr_key.unshift('ghgh');
-                        //iii=arr_key.length;
-                        //console.log('arr_key.length='+iii);
+//                        fs.writeFileSync(/*__dirname*/path2 + '/'+ID_Ray[idr]+'-'+komnat+'.json', JSON.stringify(arr));
+//                        console.log(path2 + '/'+ID_Ray[idr]+'-'+komnat+'.json'); // в консоль пишется, какой json был записан
                         let maxpr=0;
                         let minpr=999999999999;
                         let avgpr=0;
@@ -233,10 +250,8 @@ let tekkomjs=0;
                         let dataopden=den;
                         let tmp=0;
                         for(let i2=0; i2<kolpred; i2++){
-                            tmp=obj3[i2].price;
-                            //console.log(i2);
+                            tmp=obj3[i2].price;                     //tmp -  временная переменная для опр. макс. и мин. цены
                             alltotar=alltotar+obj3[i2].total_area;
-                            //console.log(maxpr);
                             if (maxpr<tmp){
                                 maxpr=tmp;
                             }
@@ -246,9 +261,7 @@ let tekkomjs=0;
                             if (i2==kolpred-1){
                                 priarearur=~~((avgpr+tmp)/alltotar);        // цена за кв. м.
                                 allprice=avgpr+tmp;                  //общая цена всех квартир
-                                //console.log('='+avgpr);
                                 avgpr=(avgpr+tmp)/kolpred;          //средняя цена квартиры
-                                //console.log('='+avgpr);
                                 avgpr=~~avgpr;                      //целая часть
                                          
                             } else {   
@@ -256,6 +269,8 @@ let tekkomjs=0;
                             }
 
                         }
+                        alltotar=~~(alltotar*10);
+                        alltotar=alltotar/10;
                         console.log('максимальная цена квартиры ='+maxpr);
                         console.log('минимальная цена квартиры ='+minpr);
                         console.log('средняя цена квартиры ='+avgpr);
@@ -266,6 +281,7 @@ let tekkomjs=0;
                         console.log('Дата = '+dataopmes);
                         console.log('Дата = '+dataopden);
                         console.log('Количество предложений = '+kolpred);
+
 
                         let obj4 = {           //ассоциативный массив для записи в json
                                         maxpr:maxpr,
@@ -288,16 +304,18 @@ let tekkomjs=0;
                        tekkomjs=komnat;
                        kolpred=0;
                         if (komnat==3){
+                            
                             flexidr=true;
                             flexkom=false;
                             kidr=idr+1;
-                            if (kidr==ID_Ray.length){    //записан последний район, выходим из цикла интервал
-                                                         // и дальше опрашивать не надо
-                                flexidr=false;                            
-                                flex=true;
-                                console.log('ВСЁ');
-                            }
-                            
+                            let tmpr=''
+                            tmpr=ID_Ray[kidr];      // временная переменная ид района после  опроса трёшек
+                                if (kidr==ID_Ray.length){    //записан последний район, выходим из цикла интервал
+                                                            // и дальше опрашивать не надо
+                                    flexidr=false;                            
+                                    flex=true;
+                                    console.log('ВСЁ');
+                                }
                         }
                         else {
                             flexkom=true;
@@ -305,19 +323,19 @@ let tekkomjs=0;
                     }
                 } catch(err){
                     console.log('ERROR: ' + err);
-                    //res.send(JSON.stringify(err));
+                    t2= Date();
+                    console.log('t2='+t2);
+                     //res.send(JSON.stringify(err));
                     return;
                 }      
             } else {
                 console.log('Empty response. statusCode:', response.statusCode);
-                //res.send(response.statusCode);
-                return;
+                res.send(response.statusCode);
+                
+               return;
             }
         });
   };
-
-//idr=-1;
-
 
 //opros po komnat
 let flexidr=false;
@@ -373,22 +391,33 @@ let OprK = function (){
             run();
             return;
         }
-        if (flexidr==true){         //увеличение индекса в массиве районов на 1, переход к след району
-            ID_R();
-        }
-        if (flexkom==true && komnat==2 && tekkomjs==2){     //опрос трёшек
-            Opros3k();
+        if (fl_opr=true){               //если флагопроса = тру, то опрашиваем
+            if (flexidr==true){         //увеличение индекса в массиве районов на 1, переход к след району
+                ID_R();
+            }
+            if (flexkom==true && komnat==2 && tekkomjs==2){     //опрос трёшек
+                Opros3k();
 
-        }
-        if (flexkom==true && komnat==1 && tekkomjs==1){     //опрос двушек
-            Opros2k();
+            }
+            if (flexkom==true && komnat==1 && tekkomjs==1){     //опрос двушек
+                Opros2k();
 
+            }
+            if (flexkom==true && komnat==0 && tekkomjs==0){       //опрос однушек
+                Opros1k();
+            }
         }
-        if (flexkom==true && komnat==0 && tekkomjs==0){       //опрос однушек
-            Opros1k();
-        }
-        
-    setTimeout(OprosKom,10000);
-    },10000);
+    setTimeout(OprosKom,8010);
+    },8020);
 };
-OprK();
+        OprK();
+        /*
+var int2 = setInterval (function(){
+    if (fl_opr==true){
+        console.log('опрос');
+
+    }
+    clearInterval(int2);
+
+    },10000);
+console.log('ghgfhfgh');*/
