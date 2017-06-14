@@ -1,0 +1,190 @@
+'use strict';
+
+let request = require('request');
+let cheerio = require('cheerio');
+let express = require('express');
+let fs      = require('fs');
+let mkdirp = require('mkdirp');
+
+/*********************************************************************************************** */
+//создание папки - работает
+//Дата и время
+let now = new Date();         
+let god = now.getFullYear();
+let mes = now.getMonth()+1;
+let den = now.getDate();
+let pathjs =`/public/json/cian/`+god+'/'+mes+'/'+den;       //год-месяц-день
+let path1=__dirname+pathjs;//+'/lite2';
+let path2=__dirname+pathjs+'/lite2';
+mkdirp(path2, function (err) {
+    if (err) console.error(err)
+    else console.log(path2)   //путь к созданной папке в терминале
+});
+/************************************************************************************************************** */
+//пример перевода строки в массив с разделителями , и убирание пробелов
+let str ='Куркино, 125, Митино, 126, Покровское-Стрешнево, 127, Северное Тушино, 128, Строгино, 129, Хорошево-Мневники, 130, Щукино, 131, Южное тушино, 132, Аэропорт, 23, Беговой, 24, Бескудниковский, 25, Войковский, 26, Восточное Дегунино, 27, Головинский, 28, Дмитровский, 29, Западное Дегунино, 30, Коптево, 31, Левобережный, 32, Молжаниновский, 33, Савёловский, 34, Сокол, 35, Тимирязевский, 36, Ховрино, 37, Хорошевский, 38, Алексеевский, 39, Алтуфьевский, 40, Бабушкинский, 41, Бибирево, 42, Бутырский, 43, Лианозово, 44, Лосиноостровский, 45, Марьфино, 46, Марьина Роща, 47, Останкинский, 48, Отрадное, 49, Ростокино, 50, Свиблово, 51, Северное Медведково, 52, Северный, 53, Южное Медведково, 54, Свиблово, 55, Внуково, 112, Дорогомилово, 113, Крылатское, 114, Кунцево, 115, Можайский, 116, Ново-Переделкино, 117, Очаково-Матвеевское, 118, Проспект Вернадского, 119, Раменки, 120, Солнцево, 121, Тропарёво-Никулино, 122, Филёвский парк, 123, Фили-Давыдково, 124, Арбат, 13, Басманный, 14, Замоскворечье, 15, Красносельский, 16, Мещанский, 17, Пресненский, 18, Таганский, 19, Тверской, 20, Хамовники, 21, Якиманка, 22, Богородское, 56, Вешняки, 57, Восточное Измайлово, 58, Восточный, 59, Гольяново, 60, Иваноское, 61, Измайлово, 62, Косино-Ухтомский, 63, Метрогородок, 64, Новогиреево, 65, Новокосино, 66, Перово, 67, Преображенское, 68, Северное Измайлово, 69, Соколиная гора, 70, Сокольники, 71, Академический, 100, Гагаринский, 101, Зюзино, 102, Коньково, 103, Котловка, 104, Ломоносовский, 105, Обручевский, 106, Северное Бутово, 107, Тёплый стан, 108, Черёмушки, 109, Южное Бутово, 110, Ясенево, 111, Бирюлёво Восточное, 84, Бирюлёво Западное, 85, Братеево, 86, Даниловский, 87, Донской, 88, Зябликово, 89, Москворечье-Сабурово, 90, Нагатино-Садовники, 91, Нагатинский затон, 92, Нагорный, 93, Орехово-Борисово Северное, 94, Орехово-Борисово Южное, 95, Царицыно, 96, Чертаново Северное, 97, Чертаново центральное, 98, Чертаново Южное, 99, Выхино-Жулебино, 72, Капотня, 73, Кузьминки, 74, Лефортово, 75, Люблино, 76, Марьино, 77, Некрасовка, 78, Нижегородский, 79, Печатники, 80, Рязанский, 81, Текстильщики, 82, Южнопортовый, 83'
+let ID_Ray=[];
+str=String(str);
+let mass = str.split(',',400);          //разделение адреса на 4 части Город, район, улица, дом
+    for (let i=0; i<mass.length;i++){
+        if (i==0){
+            i++;
+        }
+        mass[i]=mass[i].replace(' ', '');
+        ID_Ray.push(mass[i]);
+        
+        i++;
+}
+mass.length=0;
+/******************************************************************************************************* */
+//список файлов из дирректории и проверка отсутствующих
+let k2=new Array();
+k2=fs.readdirSync(path1);
+let k3='';
+let k4='';
+let k5='';
+for (let i=0; i<ID_Ray.length;i++){
+    k3=path1+'/'+ID_Ray[i]+'-1-obj2.json';
+    k4=path1+'/'+ID_Ray[i]+'-2-obj2.json';
+    k5=path1+'/'+ID_Ray[i]+'-3-obj2.json';
+        if(!fs.existsSync(k3)){
+                if (!fs.existsSync(k4)){
+                        if (!fs.existsSync(k5)){
+
+                        } else {
+                            mass.push(ID_Ray[i]);                            
+                        }
+                } else {
+                    mass.push(ID_Ray[i]);
+                }
+        } else {
+            mass.push(ID_Ray[i]);
+        }
+}
+
+/******************************************************************************************************* */
+
+let k6='';
+
+for (let i=0; i<mass.length; i++){
+ //       if (i==0){
+   //         i++;
+     //   }
+    k3=path1+'/'+mass[i]+'-1-obj2.json';
+    k4=path1+'/'+mass[i]+'-2-obj2.json';
+    k5=path1+'/'+mass[i]+'-3-obj2.json';
+
+        let optimization = function(url,komn){          //функция оптимизщации, в неё передаётся путь жсон количество комнат
+            let k6=fs.readFileSync(url,'utf8');            //чтение из жсон, НЕОБХОДИМО ПРОПАРСИТЬ!!!
+            k6=JSON.parse(k6);
+            let d1='';
+            d1=k6.length;
+            let arrtmp1=new Array();
+            let p1='';
+                for (let i=1; i<d1 ;i++){
+                    p1=k6[i].price;
+                    if (p1<=25000000 && p1>=4000000){
+                    
+                        arrtmp1.push(k6[i]);
+                    }
+
+                }
+        d1=arrtmp1.length;
+        let flag=true;
+        let price1='';
+        let kolpred='';
+        price1=arrtmp1[1].price;
+        kolpred=arrtmp1.length;
+    
+        if (flag==true){
+        
+            let maxpr=0;
+            let minpr=999999999999;
+            let avgpr=0;
+            let alltotar=0;
+            let priarearur=0;
+            let allprice=0;
+            let dataopgod=god;
+            let dataopmes=mes;
+            let dataopden=den;
+            let tmp=0;
+            let indmax='';
+            let indmin='';
+            for(let i2=0; i2<kolpred; i2++){
+                tmp=arrtmp1[i2].price;                     //tmp -  временная переменная для опр. макс. и мин. цены
+                alltotar=alltotar+arrtmp1[i2].total_area;
+                    if (maxpr<tmp){
+                        maxpr=tmp;
+                        indmax=i2;
+                    }
+                    if (minpr>tmp){
+                        minpr=tmp;
+                        indmin=i2;
+                    }
+                    if (i2==kolpred-1){
+                        priarearur=~~((avgpr+tmp)/alltotar);        // цена за кв. м.
+                        allprice=avgpr+tmp;                  //общая цена всех квартир
+                        avgpr=(avgpr+tmp)/kolpred;          //средняя цена квартиры
+                        avgpr=~~avgpr;                      //целая часть
+                                    
+                    } else {   
+                        avgpr=(avgpr+tmp);
+                    }
+                }
+            let indavg='';
+            let razavg=99999999999999;
+            let raznica=99999999999999;
+            let tmpraz='';
+            for (let i2=0; i2<kolpred;i2++){       //ищем предложение максимально близкое к средней цене
+                tmpraz=avgpr-arrtmp1[i2].price;
+                    if (tmpraz<0){
+                        tmpraz=tmpraz*(-1);    
+                    }
+                    if (tmpraz<raznica){
+                        indavg=i2;
+                        raznica=tmpraz;
+                    }
+            }
+            alltotar=~~(alltotar*10);
+            alltotar=alltotar/10;
+            console.log('максимальная цена квартиры ='+maxpr);
+            console.log('минимальная цена квартиры ='+minpr);
+            console.log('средняя цена квартиры ='+avgpr);
+            console.log('цена всех квартир ='+allprice);
+            console.log('цена за кв. метр ='+priarearur);
+            console.log('общая площадь ='+alltotar);
+            console.log('Дата = '+dataopgod);
+            console.log('Дата = '+dataopmes);
+            console.log('Дата = '+dataopden);
+            console.log('Количество предложений = '+kolpred);
+            let obj4 = {           //ассоциативный массив для записи в json
+                maxpr:maxpr,
+                minpr:minpr,
+                avgpr:avgpr,
+                allprice:allprice,
+                priarearur:priarearur,
+                alltotar:alltotar,
+                dataopgod:dataopgod,
+                dataopmes:dataopmes,
+                dataopden:dataopden,
+                kolpred:kolpred
+            };
+            let arr1=new Array();
+            arr1.push(obj4);
+            arr1.push(arrtmp1[indmax]);
+            arr1.push(arrtmp1[indmin]);
+            arr1.push(arrtmp1[indavg]);
+            //console.log(arr1);
+            fs.writeFileSync(path2 + '/'+mass[i]+'-'+komn+'-lite.json', JSON.stringify(arr1));
+            console.log(path2 + '/'+mass[i]+'-'+komn+'-lite.json');
+
+        
+    }
+
+        }
+        optimization(k3,1);
+        optimization(k4,2);
+        optimization(k5,3);
+
+}
+
