@@ -1,14 +1,9 @@
-var express = require('express');				
-
-
+var express = require('express');		
 var fs = require('fs');
-
 
 var app = express();
 
 //public folder 
-app.use('', express.static('public/app'));
+app.use('/', express.static('public/app'));
 
-
-
-app.listen(3000);
+app.listen(process.env.port||8080);

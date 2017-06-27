@@ -1,54 +1,43 @@
-function func7(){
-      alert('1');
-      let fs      = require('fs');
+'use strict';
 
-let path1js=__dirname;
+function func7(){
+
+//let path1js=__dirname;
 //Дата и время
 let now = new Date();         
 let god = now.getFullYear();
 let mes = now.getMonth()+1;
 let den = now.getDate();
-      alert('now');
-let ch=path1js.split('\\',100);
-let ch2='';
-let pathdir=ch.length-3;
-for (let i=0; i<pathdir; i++){
-      ch2=ch2+ch[i]+'\\';
 
-}
-alert(ch2);
 //***************************************************************************************************************************************************************** */
 // проверка существования json за неделю
 let mas_maxpr=[]        //массив с максимальными ценами
 let avg_maxpr=[]        //массив с максимальными ценами
 let min_maxpr=[]        //массив с максимальными ценами
-alert('1');
-for (let i=0; i<30; i++){
+
+for (let i=0; i<1; i++){
       now.setDate(now.getDate()-1);
       //console.log(now);
       god = now.getFullYear();
       mes = now.getMonth()+1;
       den = now.getDate();
-      let d2=god+'-'+mes+'-'+den;
-      console.log(d2);
-            let pathjson=ch2+'public\\json\\cian\\'+god+'\\'+mes+'\\'+den+'\\'+'lite2\\'+'33-1-lite.json';
-      if (!fs.existsSync(pathjson)){
-            console.log('НЕТ');
-            //console.log(pathjson);
-      } else {
-            console.log('ЕСТЬ');
-            //console.log(pathjson);
-            let tmp=fs.readFileSync(pathjson);
-            let obj=JSON.parse(tmp);
-            //console.log(pathjson);
-            mas_maxpr[i]=obj[0].maxpr;
-            avg_maxpr[i]=obj[0].avgpr;
-            min_maxpr[i]=obj[0].minpr;
-      }
+      let d2 = god+'-'+mes+'-'+den;
+      
+
+      //let pathjson=ch2+'public\\json\\cian\\'+god+'\\'+mes+'\\'+den+'\\'+'lite2\\'+'33-1-lite.json';
+      let pathjson = '/json/myfile.json';
+
+      //async calls
+      $.get(pathjson)
+      .then(function(data){
+            mas_maxpr[i]=data[0].maxpr;
+            avg_maxpr[i]=data[0].avgpr;
+            min_maxpr[i]=data[0].minpr;
+      });      
 };
 
 //console.log(obj[0].avgpr);
-alert('1');
+
 /*
       
 
